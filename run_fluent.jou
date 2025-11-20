@@ -1,0 +1,48 @@
+; run_fluent.jou — Journal file for CFD runs
+
+/file/read-case-hdf5 ${case}
+
+/define/models/energy yes
+/define/models/viscous k-epsilon standard yes
+/define/models/gravity yes 0 0 -9.81
+/define/models/radiation/do yes
+
+/define/materials/change-create air yes
+    1.225
+    no
+    no
+    1005
+    yes
+    0.000018
+    no
+
+/define/boundary-conditions/velocity-inlet collector_inlet
+    yes
+    0.5
+    no
+    300
+
+/define/boundary-conditions/wall collector_ground
+    yes
+    320
+
+/define/boundary-conditions/pressure-outlet chimney_outlet
+    0
+    yes
+
+/define/boundary-conditions/porous-jump turbine
+    18
+    15
+
+/solve/monitors/residual/absolute yes
+/solve/initialize/initialize-flow
+/solve/iterate 5000
+
+; Save results
+/file/write-data ${case}_results.dat
+
+; Export summary values
+/report/surface-integrals/flow-rate mass-flow chimney_outlet yes
+/report/surface-integrals/area-weighted-avg temperature collector_outlet yes
+
+/exit yes
